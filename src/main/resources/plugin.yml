@@ -1,6 +1,6 @@
 name: CountDownFloatingText
 main: io.github.hielkemaps.countdown.Main
-version: 1.0.0
+version: 1.0.1
 author: Hielke
-api-version: 1.18
+api-version: 1.19
 depend: [CommandAPI]

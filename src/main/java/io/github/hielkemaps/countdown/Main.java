@@ -2,6 +2,7 @@ package io.github.hielkemaps.countdown;
 
 import org.bukkit.Bukkit;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.TextDisplay;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -11,8 +12,8 @@ import java.util.Set;
 public class Main extends JavaPlugin {
 
     private static Plugin instance;
-    public static HashMap<Long, Countdown> countdowns = new HashMap<>();
-    public static String Prefix = "[FloatingCountdowns] ";
+    public static HashMap<String, Countdown> countdowns = new HashMap<>();
+    public static String Prefix = "[Countdowns] ";
 
     public Main() {
         instance = this;
@@ -39,26 +40,32 @@ public class Main extends JavaPlugin {
         Bukkit.getLogger().info(Prefix + "Searching for countdowns...");
 
         Bukkit.getWorlds().forEach(world -> world.getEntities().forEach(entity -> {
-            if (entity.getType() == EntityType.AREA_EFFECT_CLOUD) {
+            if (entity.getType() == EntityType.TEXT_DISPLAY) {
                 Set<String> tags = entity.getScoreboardTags();
                 if (tags.contains("countdown")) {
                     Long timestamp = null;
+                    String name = null;
 
                     for (String tag : tags) {
                         if (tag.startsWith("time_")) {
                             try {
                                 timestamp = Long.valueOf(tag.substring(5));
-                            }catch(NumberFormatException e){
+                            } catch (NumberFormatException e) {
                                 Bukkit.getLogger().warning(Prefix + "Can't add countdown: " + tag.substring(5) + " is not a long!");
                             }
                         }
+
+                        if (tag.startsWith("name_")) {
+                            name = tag.substring(5);
+                        }
                     }
 
-                    if (timestamp != null) {
+                    if (timestamp != null && name != null) {
 
-                        if (!Main.countdowns.containsKey(timestamp)) {
-                            Main.countdowns.put(timestamp, new Countdown(timestamp, entity));
-                            Bukkit.getLogger().info(Prefix + "Adding new countdown with timestamp: " + timestamp);
+                        if (!Main.countdowns.containsKey(name)) {
+                            String command = entity.getCustomName();
+                            Main.countdowns.put(name, new Countdown(name, timestamp, (TextDisplay) entity, command));
+                            Bukkit.getLogger().info(Prefix + "Adding new countdown " + name);
                         }
                     }
                 }
@@ -68,7 +75,7 @@ public class Main extends JavaPlugin {
 
 
     public static void updateCountdowns() {
-        for(Countdown c : countdowns.values()){
+        for (Countdown c : countdowns.values()) {
             c.update();
         }
     }
