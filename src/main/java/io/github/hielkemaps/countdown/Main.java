@@ -63,7 +63,7 @@ public class Main extends JavaPlugin {
                     if (timestamp != null && name != null) {
 
                         if (!Main.countdowns.containsKey(name)) {
-                            String command = entity.getCustomName();
+                            String command = entity.customName().toString();
                             Main.countdowns.put(name, new Countdown(name, timestamp, (TextDisplay) entity, command));
                             Bukkit.getLogger().info(Prefix + "Adding new countdown " + name);
                         }
