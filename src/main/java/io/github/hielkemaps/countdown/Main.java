@@ -13,6 +13,7 @@ public class Main extends JavaPlugin {
 
     private static Plugin instance;
     public static HashMap<String, Countdown> countdowns = new HashMap<>();
+    public static HashMap<String, HypeCount> hypeCounts = new HashMap<>();
     public static String Prefix = "[Countdowns] ";
 
     public Main() {
@@ -30,9 +31,42 @@ public class Main extends JavaPlugin {
 
         //Find countdowns in world after 5 seconds
         this.getServer().getScheduler().runTaskLater(instance, Main::findCountdowns, 300);
+        this.getServer().getScheduler().runTaskLater(instance, Main::findHypeCounts, 300);
 
         //Update countdowns every second
         this.getServer().getScheduler().runTaskTimerAsynchronously(instance, Main::updateCountdowns, 0, 20);
+
+        //Update hype count every second
+        this.getServer().getScheduler().runTaskTimerAsynchronously(instance, Main::updateHypeCounts, 0, 20);
+    }
+
+    public static void findHypeCounts() {
+        Bukkit.getLogger().info(Prefix + "Searching for hype counts...");
+        Bukkit.getWorlds().forEach(world -> world.getEntities().forEach(entity -> {
+            if (entity.getType() == EntityType.TEXT_DISPLAY) {
+                Set<String> tags = entity.getScoreboardTags();
+                if (tags.contains("hypeCount")) {
+                    String name = null;
+                    String id= null;
+                    for (String tag : tags) {
+                        if (tag.startsWith("name_")) {
+                            name = tag.substring(5);
+                        }
+
+                        if (tag.startsWith("id_")) {
+                            id = tag.substring(3);
+                        }
+                    }
+                    if (name != null && id != null) {
+                        if (!Main.hypeCounts.containsKey(name)) {
+                            String command = entity.getCustomName();
+                            Main.hypeCounts.put(name, new HypeCount(name, id, command, (TextDisplay) entity));
+                            Bukkit.getLogger().info(Prefix + "Adding new hype count " + name);
+                        }
+                    }
+                }
+            }
+        }));
     }
 
     public static void findCountdowns() {
@@ -63,7 +97,7 @@ public class Main extends JavaPlugin {
                     if (timestamp != null && name != null) {
 
                         if (!Main.countdowns.containsKey(name)) {
-                            String command = entity.customName().toString();
+                            String command = entity.getCustomName();
                             Main.countdowns.put(name, new Countdown(name, timestamp, (TextDisplay) entity, command));
                             Bukkit.getLogger().info(Prefix + "Adding new countdown " + name);
                         }
@@ -77,6 +111,12 @@ public class Main extends JavaPlugin {
     public static void updateCountdowns() {
         for (Countdown c : countdowns.values()) {
             c.update();
+        }
+    }
+
+    public static void updateHypeCounts() {
+        for (HypeCount count : hypeCounts.values()) {
+            count.update();
         }
     }
 }

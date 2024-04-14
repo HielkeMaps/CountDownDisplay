@@ -16,6 +16,77 @@ import java.util.Set;
 public class Commands {
 
     public Commands() {
+
+        new CommandAPICommand("hype")
+                .withPermission(CommandPermission.OP)
+                .withSubcommand(new CommandAPICommand("new")
+                        .withArguments(new StringArgument("name"))
+                        .withArguments(new StringArgument("id"))
+                        .withArguments(new GreedyStringArgument("command"))
+                        .executesPlayer((p, args) -> {
+
+                            String name = (String) args.get("name");
+                            String id = (String) args.get("id");
+                            String command = (String) args.get("command");
+
+                            TextDisplay display = (TextDisplay) p.getWorld().spawnEntity(p.getLocation(), EntityType.TEXT_DISPLAY);
+                            display.addScoreboardTag("name_" + name);
+                            display.addScoreboardTag("id_" + id);
+                            display.addScoreboardTag("hypeCount");
+                            display.customName(Component.text(command));
+
+                            HypeCount c = new HypeCount(name, id, command, display);
+
+                            if (Main.hypeCounts.containsKey(name)) {
+                                for (TextDisplay e : p.getWorld().getEntitiesByClass(TextDisplay.class)) {
+                                    Set<String> tags = e.getScoreboardTags();
+                                    if (tags.contains("hypeCount") && tags.contains("name_" + name)) {
+                                        e.remove(); //remove old entity
+                                        break;
+                                    }
+                                }
+                            }
+
+                            Main.hypeCounts.put(name, c);
+                            Main.hypeCounts.clear();
+                            Main.findHypeCounts();
+                            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
+                                Main.updateHypeCounts();
+                                p.sendMessage(Main.Prefix + "Added new hype count");
+                            });
+                        }))
+
+                .withSubcommand(new CommandAPICommand("refresh")
+                        .executesPlayer((p, args) -> {
+                            Main.hypeCounts.clear();
+                            Main.findHypeCounts();
+                            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
+                                Main.updateHypeCounts();
+                                p.sendMessage(Main.Prefix + "Refreshed hype counts!");
+                            });
+                        }))
+
+                .withSubcommand(new CommandAPICommand("increase")
+                        .withArguments(new StringArgument("name"))
+                        .executes((sender, args) -> {
+                            String name = (String) args.get("name");
+
+                            HypeCount hypeCount = Main.hypeCounts.get(name);
+                            if(hypeCount != null){
+                                hypeCount.addHype();
+                                sender.sendMessage("Adding hype to " + name);
+                            }
+                        }))
+
+                .withSubcommand(new CommandAPICommand("list")
+                        .executesPlayer((p, args) -> {
+
+                            p.sendMessage(Main.Prefix + "Hype counters:");
+                            Main.hypeCounts.forEach((s, count) -> p.sendMessage("- " + s + " [" + count.command + "]"));
+                        }))
+
+                .register();
+
         new CommandAPICommand("countdown")
                 .withPermission(CommandPermission.OP)
 

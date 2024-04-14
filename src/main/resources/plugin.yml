@@ -1,6 +1,6 @@
 name: CountDownDisplay
 main: io.github.hielkemaps.countdown.Main
-version: 1.0.3
+version: 1.0.4
 author: Hielke
 api-version: '1.20'
 depend: [CommandAPI]
