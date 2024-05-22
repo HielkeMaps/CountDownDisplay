@@ -52,15 +52,11 @@ public class Main extends JavaPlugin {
                         if (tag.startsWith("name_")) {
                             name = tag.substring(5);
                         }
-
-                        if (tag.startsWith("id_")) {
-                            id = tag.substring(3);
-                        }
                     }
-                    if (name != null && id != null) {
+                    if (name != null) {
                         if (!Main.hypeCounts.containsKey(name)) {
                             String command = entity.getCustomName();
-                            Main.hypeCounts.put(name, new HypeCount(name, id, command, (TextDisplay) entity));
+                            Main.hypeCounts.put(name, new HypeCount(name, command, (TextDisplay) entity));
                             Bukkit.getLogger().info(Prefix + "Adding new hype count " + name);
                         }
                     }

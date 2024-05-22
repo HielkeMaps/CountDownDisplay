@@ -15,14 +15,12 @@ import java.net.URL;
 public class HypeCount {
 
     public final String name;
-    public final String id;
     private final TextDisplay entity;
     public final String command;
     private int hypeCount = 0;
 
-    public HypeCount(String name, String id, String command, TextDisplay entity) {
+    public HypeCount(String name, String command, TextDisplay entity) {
         this.name = name;
-        this.id = id;
         this.command = command;
 
         this.entity = entity;
@@ -44,7 +42,7 @@ public class HypeCount {
 
     public void update() {
         try {
-            URL apiUrl = new URL("https://count.cab/get/" + id);
+            URL apiUrl = new URL("https://api.hielkemaps.com/counter/get");
             HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
             connection.setRequestMethod("GET");
 
@@ -68,7 +66,7 @@ public class HypeCount {
 
         Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), () -> {
             try {
-                URL apiUrl = new URL("https://count.cab/hit/" + id);
+                URL apiUrl = new URL("https://api.hielkemaps.com/counter/increase");
                 HttpURLConnection connection = (HttpURLConnection) apiUrl.openConnection();
                 connection.setRequestMethod("GET");
                 int responseCode = connection.getResponseCode();

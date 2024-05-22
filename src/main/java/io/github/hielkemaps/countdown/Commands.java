@@ -21,21 +21,18 @@ public class Commands {
                 .withPermission(CommandPermission.OP)
                 .withSubcommand(new CommandAPICommand("new")
                         .withArguments(new StringArgument("name"))
-                        .withArguments(new StringArgument("id"))
                         .withArguments(new GreedyStringArgument("command"))
                         .executesPlayer((p, args) -> {
 
                             String name = (String) args.get("name");
-                            String id = (String) args.get("id");
                             String command = (String) args.get("command");
 
                             TextDisplay display = (TextDisplay) p.getWorld().spawnEntity(p.getLocation(), EntityType.TEXT_DISPLAY);
                             display.addScoreboardTag("name_" + name);
-                            display.addScoreboardTag("id_" + id);
                             display.addScoreboardTag("hypeCount");
                             display.customName(Component.text(command));
 
-                            HypeCount c = new HypeCount(name, id, command, display);
+                            HypeCount c = new HypeCount(name, command, display);
 
                             if (Main.hypeCounts.containsKey(name)) {
                                 for (TextDisplay e : p.getWorld().getEntitiesByClass(TextDisplay.class)) {
